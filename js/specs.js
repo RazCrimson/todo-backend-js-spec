@@ -16,13 +16,13 @@ function defineSpecsFor(apiRoot){
     return post(url,data,options).then( transformResponseToJson );
   }
 
-  function patch(url, data, options){
+  function put(url, data, options){
     options = options || {};
     options.data = JSON.stringify(data);
-    return ajax("PATCH", url, options);
+    return ajax("PUT", url, options);
   }
-  function patchJson(url, data, options){
-    return patch(url,data,options).then( transformResponseToJson );
+  function putJson(url, data, options){
+    return put(url,data,options).then( transformResponseToJson );
   }
 
   function delete_(url, options){
@@ -135,28 +135,28 @@ function defineSpecsFor(apiRoot){
         return expect(getAgainstUrlOfFirstTodo).to.eventually.have.property("title");
       });
 
-      it("can change the todo's title by PATCHing to the todo's url", function(){
+      it("can change the todo's title by PUTing to the todo's url", function(){
         return createFreshTodoAndGetItsUrl({title:"initial title"})
           .then( function(urlForNewTodo){
-            return patchJson( urlForNewTodo, {title:"bathe the cat"} );
-          }).then( function(patchedTodo){
-            expect(patchedTodo).to.have.property("title","bathe the cat");
+            return putJson( urlForNewTodo, {title:"bathe the cat"} );
+          }).then( function(putedTodo){
+            expect(putedTodo).to.have.property("title","bathe the cat");
           });
       });
 
-      it("can change the todo's completedness by PATCHing to the todo's url", function(){
+      it("can change the todo's completedness by PUTing to the todo's url", function(){
         return createFreshTodoAndGetItsUrl()
           .then( function(urlForNewTodo){
-            return patchJson( urlForNewTodo, {completed:true} );
-          }).then( function(patchedTodo){
-            expect(patchedTodo).to.have.property("completed",true);
+            return putJson( urlForNewTodo, {completed:true} );
+          }).then( function(putedTodo){
+            expect(putedTodo).to.have.property("completed",true);
           });
       });
 
       it("changes to a todo are persisted and show up when re-fetching the todo", function(){
-        var patchedTodo = createFreshTodoAndGetItsUrl()
+        var putedTodo = createFreshTodoAndGetItsUrl()
           .then( function(urlForNewTodo){
-            return patchJson( urlForNewTodo, {title:"changed title", completed:true} );
+            return putJson( urlForNewTodo, {title:"changed title", completed:true} );
           });
 
         function verifyTodosProperties(todo){
@@ -164,13 +164,13 @@ function defineSpecsFor(apiRoot){
           expect(todo).to.have.property("title","changed title");
         }
 
-        var verifyRefetchedTodo = patchedTodo.then(function(todo){
+        var verifyRefetchedTodo = putedTodo.then(function(todo){
           return get( todo.url );
         }).then( function(refetchedTodo){
           verifyTodosProperties(refetchedTodo);
         });
 
-        var verifyRefetchedTodoList = patchedTodo.then(function(){
+        var verifyRefetchedTodoList = putedTodo.then(function(){
           return getRoot();
         }).then( function(todoList){
           expect(todoList).to.have.length(1);
@@ -199,21 +199,21 @@ function defineSpecsFor(apiRoot){
         return expect(postResult).to.eventually.have.property("order",523);
       });
 
-      it("can PATCH a todo to change its order", function(){
-        var patchedTodo = createFreshTodoAndGetItsUrl( {order: 10} )
+      it("can PUT a todo to change its order", function(){
+        var putedTodo = createFreshTodoAndGetItsUrl( {order: 10} )
           .then( function(newTodoUrl){
-            return patchJson(newTodoUrl,{order:95});
+            return putJson(newTodoUrl,{order:95});
           });
 
-        return expect(patchedTodo).to.eventually.have.property("order",95);
+        return expect(putedTodo).to.eventually.have.property("order",95);
       });
 
       it("remembers changes to a todo's order", function(){
         var refetchedTodo = createFreshTodoAndGetItsUrl( {order: 10} )
           .then( function(newTodoUrl){
-            return patchJson(newTodoUrl,{order:95});
-          }).then( function( patchedTodo ){
-            return get(urlFromTodo(patchedTodo));
+            return putJson(newTodoUrl,{order:95});
+          }).then( function( putedTodo ){
+            return get(urlFromTodo(putedTodo));
           });
 
         return expect(refetchedTodo).to.eventually.have.property("order",95);
